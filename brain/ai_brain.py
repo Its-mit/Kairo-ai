@@ -1,18 +1,18 @@
-from openai import OpenAI
-
-client = OpenAI(api_key="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")
+import requests
 
 def ask_ai(prompt):
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are Kairo AI, a helpful personal assistant."},
-                {"role": "user", "content": prompt}
-            ]
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "phi",
+                "prompt": f"You are Kairo AI, a smart assistant. Give short helpful answers.\nUser: {prompt}",
+                "stream": False
+            }
         )
 
-        return response.choices[0].message.content
+        return response.json()['response']
 
     except Exception as e:
-        return "Error connecting to AI"
+        print("ERROR:", e)
+        return "AI not available"

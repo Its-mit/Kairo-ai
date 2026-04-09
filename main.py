@@ -13,30 +13,29 @@ speak("Kai AI is starting")
 while True:
     command = take_command()
 
-    if "hey kai" not in command:
-        continue
-
-    speak("Yes, I am listening")
-
-    command = take_command()
-
     if not command:
         continue
+
+    # Wake word check
+    if "baby" not in command:
+        continue
+
+    # Remove wake word
+    command = command.replace("baby", "").strip()
+
+    speak("Yes, I am listening")
 
     intent = detect_intent(command)
     print("Intent:", intent)
 
-    if intent == "GREETING":
-        speak("Hey, I am Kairo AI. Ready to assist you.")
+    #if intent == "GREETING":
+    #    speak("Hey, I am Kairo AI. Ready to assist you.")
 
-    elif "exit" in command or "stop" in command:
+    if "exit" in command or "stop" in command:
         speak("Goodbye")
         break
 
-    elif intent == "GET_TIME":
-        time = datetime.datetime.now().strftime("%I:%M %p")
-        speak(f"The time is {time}")
-
+    
     elif intent == "PLAY_SONG":
         song = command.replace("play", "").strip()
         speak(f"Playing {song}")
@@ -86,15 +85,23 @@ while True:
         except:
             speak("Invalid time")
 
-    elif intent == "SEND_WHATSAPP":
-        name = command.replace("send message to", "").strip()
+    elif intent == "SEND_WHATSAPP_SMART":
+        try:
+            parts = command.split("to")
 
-        speak(f"What should I send to {name}?")
-        message = take_command()
+            message = parts[0]
+            message = message.replace("send", "")
+            message = message.replace("message", "")
+            message = message.strip()
 
-        speak("Sending message")
-        result = send_whatsapp_message(name, message)
-        speak(result)
+            name = parts[1].strip()
+
+            speak(f"Sending message to {name}")
+            result = send_whatsapp_message(name, message)
+            speak(result)
+
+        except:
+            speak("Sorry, I couldn't understand")
     else:
         speak("Let me think")
         response = ask_ai(command)

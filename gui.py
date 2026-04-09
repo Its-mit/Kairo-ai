@@ -1,71 +1,66 @@
 import tkinter as tk
+from tkinter import scrolledtext
 from voice.input import take_command
 from voice.output import speak
 from brain.parser import detect_intent
+from brain.ai_brain import ask_ai
 from modules.system_control import open_app
-from modules.web import play_song, search_google, get_info
-from modules.automation import tell_time, tell_date
-import datetime
+from modules.web import play_song, search_google
+from modules.automation import send_whatsapp_message
 
-def run_ai():
-    command = take_command()
-
-    if not command:
-        return
-
-    user_text.set("You: " + command)
-
+def process_command(command):
     intent = detect_intent(command)
 
-    if intent == "GREETING":
-        response = "Hello, how can I help you?"
-
-    elif intent == "GET_TIME":
-        response = "Time is " + tell_time()
-
-    elif intent == "GET_DATE":
-        response = "Today is " + tell_date()
-
-    elif intent == "OPEN_APP":
-        app_name = command.replace("open", "").strip()
-        open_app(app_name)
-        response = f"Opening {app_name}"
+    if intent == "OPEN_APP":
+        app = command.replace("open", "").strip()
+        open_app(app)
+        return f"Opening {app}"
 
     elif intent == "PLAY_SONG":
         song = command.replace("play", "").strip()
         play_song(song)
-        response = f"Playing {song}"
+        return f"Playing {song}"
 
-    elif intent == "SEARCH_GOOGLE":
-        query = command.replace("search", "").strip()
-        search_google(query)
-        response = f"Searching {query}"
+    elif intent == "SEND_WHATSAPP_SMART":
+        try:
+            parts = command.split("to")
+            message = parts[0].replace("send", "").replace("message", "").strip()
+            name = parts[1].strip()
 
-    elif intent == "GET_INFO":
-        response = get_info(command)
+            result = send_whatsapp_message(name, message)
+            return result
+        except:
+            return "Error sending message"
 
     else:
-        response = "Sorry, I did not understand"
+        return ask_ai(command)
 
-    ai_text.set("Kairo: " + response)
+
+def run_ai():
+    command = take_command()
+    if not command:
+        return
+
+    chat.insert(tk.END, f"You: {command}\n")
+
+    response = process_command(command)
+
+    chat.insert(tk.END, f"Kairo: {response}\n\n")
     speak(response)
 
-# GUI Window
+# GUI
 root = tk.Tk()
-root.title("KAIRO AI Assistant")
-root.geometry("500x400")
-
-# Text Variables
-user_text = tk.StringVar()
-ai_text = tk.StringVar()
-
+root.title("KAIRO AI")
+root.geometry("600x500")
 root.configure(bg="#1e1e1e")
 
-tk.Label(root, text="KAIRO AI", font=("Arial", 22, "bold"), bg="#1e1e1e", fg="cyan").pack(pady=10)
+title = tk.Label(root, text="KAIRO AI", font=("Arial", 20, "bold"), bg="#1e1e1e", fg="cyan")
+title.pack(pady=10)
 
-tk.Label(root, textvariable=user_text, wraplength=400, bg="#1e1e1e", fg="white").pack(pady=10)
-tk.Label(root, textvariable=ai_text, wraplength=400, bg="#1e1e1e", fg="lightgreen").pack(pady=10)
+chat = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=70, height=20, bg="#121212", fg="white")
+chat.pack(padx=10, pady=10)
 
-tk.Button(root, text="🎤 Speak", command=run_ai, height=2, width=20, bg="cyan").pack(pady=20)
-# Run app
+btn = tk.Button(root, text="🎤 Speak", command=run_ai, bg="cyan", height=2, width=20)
+btn.pack(pady=10)
+
 root.mainloop()

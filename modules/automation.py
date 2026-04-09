@@ -3,6 +3,7 @@ import time
 import pyautogui
 from modules.contacts import contacts
 import datetime
+import urllib.parse
 
 def tell_time():
     return datetime.datetime.now().strftime("%I:%M %p")
@@ -15,20 +16,21 @@ def set_reminder(seconds, message):
     return message
 
 def send_whatsapp_message(name, message):
-    name = name.lower()
+    try:
+        number = contacts.get(name.lower())
 
-    if name in contacts:
-        number = contacts[name]
+        if not number:
+            return "Contact not found"
 
-        # Open WhatsApp chat
-        webbrowser.open(f"https://web.whatsapp.com/send?phone={number}")
-        time.sleep(10)  # wait for WhatsApp to load
+        msg = urllib.parse.quote(message)
+        url = f"https://web.whatsapp.com/send?phone={number}&text={msg}"
 
-        # Type message
-        pyautogui.write(message)
-        time.sleep(1)
+        webbrowser.open(url)
+        time.sleep(15)
         pyautogui.press("enter")
 
-        return "Message sent"
-    else:
-        return "Contact not found"
+        return "Message sent successfully"
+
+    except Exception as e:
+        print("ERROR:", e)
+        return "Failed"

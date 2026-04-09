@@ -3,6 +3,8 @@ def detect_intent(command):
 
     if "open" in command:
         return "OPEN_APP"
+    elif "send" in command and "to" in command:
+        return "SEND_WHATSAPP_SMART"
 
     elif "play" in command:
         return "PLAY_SONG"
@@ -29,4 +31,4 @@ def detect_intent(command):
         return "SEND_WHATSAPP"
     
     else:
-        return "UNKNOWN"
+        return "AI"

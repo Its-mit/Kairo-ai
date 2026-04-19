@@ -1,13 +1,34 @@
+# parsec
+
 def detect_intent(command):
     command = command.lower()
 
-    if "open" in command:
+    if any(word in command for word in ["open", "start", "launch"]):
         return "OPEN_APP"
-    elif "send" in command and "to" in command:
-        return "SEND_WHATSAPP_SMART"
+
+    elif any(word in command for word in ["close", "exit", "quit"]):
+        return "CLOSE_APP"
+
+    elif any(word in command for word in ["minimize", "minimise", "minimixe"]):
+        return "MINIMIZE_APP"
+    elif any(word in command for word in ["maximize", "maximise", "full screen", "fullscreen"]):
+        return "MAXIMIZE_APP"
+
+    # -------- MUSIC CONTROL --------
+    elif any(word in command for word in ["next"]):
+        return "NEXT_SONG"
+
+    elif any(word in command for word in ["previous", "back"]):
+        return "PREVIOUS_SONG"
+
+    elif any(word in command for word in ["pause", "stop song"]):
+        return "PAUSE_SONG"
 
     elif "play" in command:
         return "PLAY_SONG"
+
+    elif "send" in command and "to" in command:
+        return "SEND_WHATSAPP_SMART"
 
     elif "search" in command:
         return "SEARCH_GOOGLE"
@@ -18,17 +39,11 @@ def detect_intent(command):
     elif "time" in command:
         return "GET_TIME"
 
-    elif "hello" in command:
-        return "GREETING"
-    
     elif "date" in command:
         return "GET_DATE"
 
     elif "remind" in command:
         return "SET_REMINDER"
 
-    elif "send message to" in command:
-        return "SEND_WHATSAPP"
-    
     else:
         return "AI"

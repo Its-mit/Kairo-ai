@@ -1,0 +1,202 @@
+[33mcommit 999fdfe97bac17bd519e8a31f612622eb2a46a7a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32msumit-dev-fix[m[33m)[m
+Author: Its-mit <mandal.sumit2003@gmail.com>
+Date:   Mon Apr 20 00:28:59 2026 +0530
+
+    1st commit
+
+[33mcommit 3bb4d43ff4383ecd4fdeab4a33f14b00d6e2d71a[m[33m ([m[1;31morigin/trishita-dev[m[33m, [m[1;31morigin/dev[m[33m)[m
+Merge: 78b24ee 01227c8
+Author: Its-mit <mandal.sumit2003@gmail.com>
+Date:   Thu Apr 9 14:22:55 2026 +0530
+
+    Merge branch 'main' of https://github.com/Its-mit/Kairo-ai
+
+[33mcommit 78b24eeb72435889147f38e7cd45de8334c10a3c[m
+Author: Its-mit <mandal.sumit2003@gmail.com>
+Date:   Thu Apr 9 14:22:45 2026 +0530
+
+    commit
+
+[1mdiff --git a/brain/__pycache__/ai_brain.cpython-310.pyc b/brain/__pycache__/ai_brain.cpython-310.pyc[m
+[1mindex 9a5dc64..150ca8f 100644[m
+Binary files a/brain/__pycache__/ai_brain.cpython-310.pyc and b/brain/__pycache__/ai_brain.cpython-310.pyc differ
+[1mdiff --git a/brain/__pycache__/parser.cpython-310.pyc b/brain/__pycache__/parser.cpython-310.pyc[m
+[1mindex f5b01ec..63071a8 100644[m
+Binary files a/brain/__pycache__/parser.cpython-310.pyc and b/brain/__pycache__/parser.cpython-310.pyc differ
+[1mdiff --git a/brain/ai_brain.py b/brain/ai_brain.py[m
+[1mindex 3a2fac6..b906d6e 100644[m
+[1m--- a/brain/ai_brain.py[m
+[1m+++ b/brain/ai_brain.py[m
+[36m@@ -1,18 +1,18 @@[m
+[31m-from openai import OpenAI[m
+[31m-[m
+[31m-client = OpenAI(api_key="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")[m
+[32m+[m[32mimport requests[m
+ [m
+ def ask_ai(prompt):[m
+     try:[m
+[31m-        response = client.chat.completions.create([m
+[31m-            model="gpt-4o-mini",[m
+[31m-            messages=[[m
+[31m-                {"role": "system", "content": "You are Kairo AI, a helpful personal assistant."},[m
+[31m-                {"role": "user", "content": prompt}[m
+[31m-            ][m
+[32m+[m[32m        response = requests.post([m
+[32m+[m[32m            "http://localhost:11434/api/generate",[m
+[32m+[m[32m            json={[m
+[32m+[m[32m                "model": "phi",[m
+[32m+[m[32m                "prompt": f"You are Kairo AI, a smart assistant. Give short helpful answers.\nUser: {prompt}",[m
+[32m+[m[32m                "stream": False[m
+[32m+[m[32m            }[m
+         )[m
+ [m
+[31m-        return response.choices[0].message.content[m
+[32m+[m[32m        return response.json()['response'][m
+ [m
+     except Exception as e:[m
+[31m-        return "Error connecting to AI"[m
+\ No newline at end of file[m
+[32m+[m[32m        print("ERROR:", e)[m
+[32m+[m[32m        return "AI not available"[m
+\ No newline at end of file[m
+[1mdiff --git a/brain/memory.py b/brain/memory.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..f6e4ef4[m
+[1m--- /dev/null[m
+[1m+++ b/brain/memory.py[m
+[36m@@ -0,0 +1 @@[m
+[32m+[m[32mlast_contact = None[m
+\ No newline at end of file[m
+[1mdiff --git a/brain/parser.py b/brain/parser.py[m
+[1mindex 5eeb4c3..76f3c11 100644[m
+[1m--- a/brain/parser.py[m
+[1m+++ b/brain/parser.py[m
+[36m@@ -3,6 +3,8 @@[m [mdef detect_intent(command):[m
+ [m
+     if "open" in command:[m
+         return "OPEN_APP"[m
+[32m+[m[32m    elif "send" in command and "to" in command:[m
+[32m+[m[32m        return "SEND_WHATSAPP_SMART"[m
+ [m
+     elif "play" in command:[m
+         return "PLAY_SONG"[m
+[36m@@ -29,4 +31,4 @@[m [mdef detect_intent(command):[m
+         return "SEND_WHATSAPP"[m
+     [m
+     else:[m
+[31m-        return "UNKNOWN"[m
+\ No newline at end of file[m
+[32m+[m[32m        return "AI"[m
+\ No newline at end of file[m
+[1mdiff --git a/gui.py b/gui.py[m
+[1mindex 6dd968b..fd5f968 100644[m
+[1m--- a/gui.py[m
+[1m+++ b/gui.py[m
+[36m@@ -1,71 +1,66 @@[m
+ import tkinter as tk[m
+[32m+[m[32mfrom tkinter import scrolledtext[m
+ from voice.input import take_command[m
+ from voice.output import speak[m
+ from brain.parser import detect_intent[m
+[32m+[m[32mfrom brain.ai_brain import ask_ai[m
+ from modules.system_control import open_app[m
+[31m-from modules.web import play_song, search_google, get_info[m
+[31m-from modules.automation import tell_time, tell_date[m
+[31m-import datetime[m
+[31m-[m
+[31m-def run_ai():[m
+[31m-    command = take_command()[m
+[31m-[m
+[31m-    if not command:[m
+[31m-        return[m
+[31m-[m
+[31m-    user_text.set("You: " + command)[m
+[32m+[m[32mfrom modules.web import play_song, search_google[m
+[32m+[m[32mfrom modules.automation import send_whatsapp_message[m
+ [m
+[32m+[m[32mdef process_command(command):[m
+     intent = detect_intent(command)[m
+ [m
+[31m-    if intent == "GREETING":[m
+[31m-        response = "Hello, how can I help you?"[m
+[31m-[m
+[31m-    elif intent == "GET_TIME":[m
+[31m-        response = "Time is " + tell_time()[m
+[31m-[m
+[31m-    elif intent == "GET_DATE":[m
+[31m-        response = "Today is " + tell_date()[m
+[31m-[m
+[31m-    elif intent == "OPEN_APP":[m
+[31m-        app_name = command.replace("open", "").strip()[m
+[31m-        open_app(app_name)[m
+[31m-        response = f"Opening {app_name}"[m
+[32m+[m[32m    if intent == "OPEN_APP":[m
+[32m+[m[32m        app = command.replace("open", "").strip()[m
+[32m+[m[32m        open_app(app)[m
+[32m+[m[32m        return f"Opening {app}"[m
+ [m
+     elif intent == "PLAY_SONG":[m
+         song = command.replace("play", "").strip()[m
+         play_song(song)[m
+[31m-        response = f"Playing {song}"[m
+[32m+[m[32m        return f"Playing {song}"[m
+ [m
+[31m-    elif intent == "SEARCH_GOOGLE":[m
+[31m-        query = command.replace("search", "").strip()[m
+[31m-        search_google(query)[m
+[31m-        response = f"Searching {query}"[m
+[32m+[m[32m    elif intent == "SEND_WHATSAPP_SMART":[m
+[32m+[m[32m        try:[m
+[32m+[m[32m            parts = command.split("to")[m
+[32m+[m[32m            message = parts[0].replace("send", "").replace("message", "").strip()[m
+[32m+[m[32m            name = parts[1].strip()[m
+ [m
+[31m-    elif intent == "GET_INFO":[m
+[31m-        response = get_info(command)[m
+[32m+[m[32m            result = send_whatsapp_message(name, message)[m
+[32m+[m[32m            return result[m
+[32m+[m[32m        except:[m
+[32m+[m[32m            return "Error sending message"[m
+ [m
+     else:[m
+[31m-        response = "Sorry, I did not understand"[m
+[32m+[m[32m        return ask_ai(command)[m
+ [m
+[31m-    ai_text.set("Kairo: " + response)[m
+[31m-    speak(response)[m
+ [m
+[31m-# GUI Window[m
+[31m-root = tk.Tk()[m
+[31m-root.title("KAIRO AI Assistant")[m
+[31m-root.geometry("500x400")[m
+[32m+[m[32mdef run_ai():[m
+[32m+[m[32m    command = take_command()[m
+[32m+[m[32m    if not command:[m
+[32m+[m[32m        return[m
+ [m
+[31m-# Text Variables[m
+[31m-user_text = tk.StringVar()[m
+[31m-ai_text = tk.StringVar()[m
+[32m+[m[32m    chat.insert(tk.END, f"You: {command}\n")[m
+ [m
+[32m+[m[32m    response = process_command(command)[m
+[32m+[m
+[32m+[m[32m    chat.insert(tk.END, f"Kairo: {response}\n\n")[m
+[32m+[m[32m    speak(response)[m
+[32m+[m
+[32m+[m[32m# GUI[m
+[32m+[m[32mroot = tk.Tk()[m
+[32m+[m[32mroot.title("KAIRO AI")[m
+[32m+[m[32mroot.geometry("600x500")[m
+ root.configure(bg="#1e1e1e")[m
+ [m
+[31m-tk.Label(root, text="KAIRO AI", font=("Arial", 22, "bold"), bg="#1e1e1e", fg="cyan").pack(pady=10)[m
+[32m+[m[32mtitle = tk.Label(root, text="KAIRO AI", font=("Arial", 20, "bold"), bg="#1e1e1e", fg="cyan")[m
+[32m+[m[32mtitle.pack(pady=10)[m
+[32m+[m
+[32m+[m[32mchat = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=70, height=20, bg="#121212", fg="white")[m
+[32m+[m[32mchat.pack(padx=10, pady=10)[m
+ [m
+[31m-tk.Label(root, textvariable=user_text, wraplength=400, bg="#1e1e1e", fg="white").pack(pady=10)[m
+[31m-tk.Label(root, textvariable=ai_text, wraplength=400, bg="#1e1e1e", fg="lightgreen").pack(pady=10)[m
+[32m+[m[32mbtn = tk.Button(root, te

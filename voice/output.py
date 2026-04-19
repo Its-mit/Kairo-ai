@@ -7,8 +7,8 @@ import os
 def speak(text):
     print("Speaking:", text)
     tts = gTTS(text=text, lang='en')
-    tts.save("voice.mp3")
-    os.system("start voice.mp3")
+    tts.save("assets/voice.mp3")
+    os.system("start assets/voice.mp3")
 
 #   import pyttsx3
 

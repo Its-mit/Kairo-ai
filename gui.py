@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
+
+# ======== ALL IMPORTS =========
 from voice.input import take_command
 from voice.output import speak
 from brain.parser import detect_intent
@@ -7,6 +9,7 @@ from brain.ai_brain import ask_ai
 from modules.system_control import open_app
 from modules.web import play_song, search_google
 from modules.automation import send_whatsapp_message
+
 
 def process_command(command):
     intent = detect_intent(command)
@@ -48,7 +51,7 @@ def run_ai():
     chat.insert(tk.END, f"Kairo: {response}\n\n")
     speak(response)
 
-# GUI
+# ========= GUI =========
 root = tk.Tk()
 root.title("KAIRO AI")
 root.geometry("600x500")

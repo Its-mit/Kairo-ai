@@ -3,6 +3,22 @@
 from groq import Groq
 import os
 from dotenv import load_dotenv
+from brain.personality import (
+    get_name,
+    get_greeting,
+    get_wake_word
+)
+system_prompt = f"""
+You are KAIRO AI.
+
+User name is {get_name()}.
+
+Call the user {get_greeting()} sometimes naturally.
+
+Wake word is {get_wake_word()}.
+
+Be friendly, smart, emotional, and concise.
+"""
 
 # Load .env file
 load_dotenv()
@@ -22,7 +38,7 @@ def ask_ai(prompt):
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
-                {"role": "system", "content": "You are Kairo AI. Give short, helpful answers."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
             ]
         )

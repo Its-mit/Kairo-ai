@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
+import threading # <-- Added for background processing
+
 from voice.input import take_command
 from voice.output import speak
 from brain.parser import detect_intent
@@ -26,7 +28,6 @@ def process_command(command):
             parts = command.split("to")
             message = parts[0].replace("send", "").replace("message", "").strip()
             name = parts[1].strip()
-
             result = send_whatsapp_message(name, message)
             return result
         except:
@@ -35,20 +36,29 @@ def process_command(command):
     else:
         return ask_ai(command)
 
-
-def run_ai():
+def run_ai_thread():
+    # Disable button while listening to prevent overlapping clicks
+    btn.config(state=tk.DISABLED, text="Listening...")
+    
     command = take_command()
-    if not command:
-        return
+    if command:
+        chat.insert(tk.END, f"You: {command}\n")
+        chat.see(tk.END) # Auto-scroll to bottom
 
-    chat.insert(tk.END, f"You: {command}\n")
+        response = process_command(command)
 
-    response = process_command(command)
+        chat.insert(tk.END, f"Kairo: {response}\n\n")
+        chat.see(tk.END)
+        speak(response)
+    
+    # Re-enable button after speaking
+    btn.config(state=tk.NORMAL, text="🎤 Speak")
 
-    chat.insert(tk.END, f"Kairo: {response}\n\n")
-    speak(response)
+def start_ai():
+    # Run the AI logic in a separate thread so the GUI doesn't freeze
+    threading.Thread(target=run_ai_thread, daemon=True).start()
 
-# GUI
+# GUI Setup
 root = tk.Tk()
 root.title("KAIRO AI")
 root.geometry("600x500")
@@ -60,7 +70,8 @@ title.pack(pady=10)
 chat = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=70, height=20, bg="#121212", fg="white")
 chat.pack(padx=10, pady=10)
 
-btn = tk.Button(root, text="🎤 Speak", command=run_ai, bg="cyan", height=2, width=20)
+# Notice the command is now start_ai
+btn = tk.Button(root, text="🎤 Speak", command=start_ai, bg="cyan", height=2, width=20)
 btn.pack(pady=10)
 
 root.mainloop()

@@ -1,3 +1,4 @@
+# web.py
 import pywhatkit
 import wikipedia
 import webbrowser

@@ -1,4 +1,4 @@
-#automation 
+#automation.py
 
 import webbrowser
 import time

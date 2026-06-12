@@ -1,3 +1,4 @@
+# personality.py
 from memory import load_profile
 
 def get_profile():

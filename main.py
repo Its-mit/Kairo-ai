@@ -1,3 +1,4 @@
+# main.py
 from voice.input import take_command
 from voice.output import speak
 
@@ -21,13 +22,13 @@ if profile is None:
 
     profile = load_profile()
 
-    speak(f"Nice to meet you {profile['wake_word']}")
+    speak(f"Nice to meet you {profile['name']}")
 
 else:
 
     speak("System initialized successfully")
 
-    speak(f"Welcome back {profile['wake_word']}")
+    speak(f"Welcome back {profile['name']}")
 
 # -------- MAIN LOOP --------
 

@@ -68,18 +68,20 @@ def get_smart_intent(command):
     Return ONLY a raw JSON object. Do not use Markdown formatting or text.
     
     Rules:
-    1. If the user wants to play music or a video, intent is "PLAY_SONG", target is the song/video name.
-    2. If the user wants to open an app or website (without playing a specific song), intent is "OPEN", target is the app/website name.
-    3. If the user wants to write an essay, report, notepad note, or draft an email, intent is "WRITE_CONTENT", target is the application ('notepad', 'word', 'mail'), and topic is what to write about.
-    4. Identify the browser if specifically mentioned (brave, chrome). Otherwise output "default".
-    5. If it's a general question, greeting, or conversation, intent is "AI", target is the full command.
-
+    1. Play music/video -> intent is "PLAY_SONG", target is the song/video name.
+    2. Open an app/website -> intent is "OPEN", target is the app/website name.
+    3. Close/exit an app -> intent is "CLOSE", target is the app name (or "current" if unspecified).
+    4. Maximize/enlarge window -> intent is "MAXIMIZE", target is the app name (or "current" if unspecified).
+    5. Minimize/hide window -> intent is "MINIMIZE", target is the app name (or "current" if unspecified).
+    6. Write/draft document/email -> intent is "WRITE_CONTENT", target is the app name, topic is the subject to write about.
+    7. For basic info, time, date, searching, or chatting -> intent is "AI", target is the full command.
+    
     Format required:
     {{
-        "intent": "PLAY_SONG" | "OPEN" | "WRITE_CONTENT" | "AI",
-        "target": "song name / app name / full command",
+        "intent": "PLAY_SONG" | "OPEN" | "CLOSE" | "MAXIMIZE" | "MINIMIZE" | "WRITE_CONTENT" | "AI",
+        "target": "clean target name or 'current'",
         "browser": "brave" | "chrome" | "default",
-        "topic": "only used if WRITE_CONTENT to describe the essay/mail subject"
+        "topic": "topic if WRITE_CONTENT, else empty"
     }}
     """
     
@@ -92,7 +94,6 @@ def get_smart_intent(command):
         
         raw_text = response.choices[0].message.content.strip()
         
-        # Clean up in case the LLM adds markdown backticks (```json)
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:-3]
         elif raw_text.startswith("```"):
@@ -102,5 +103,4 @@ def get_smart_intent(command):
         
     except Exception as e:
         print("Intent Parsing Error:", e)
-        # Fallback to general conversation if the parser fails
-        return {"intent": "AI", "target": command, "browser": "default"}
+        return {"intent": "AI", "target": command, "browser": "default", "topic": ""}
